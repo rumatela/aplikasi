@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Virtual Tour</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #pano { width: 100%; height: 100%; background: #000; }
+    .hotspot { background: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; cursor: pointer; }
+  </style>
+  <script src="https://www.marzipano.net/demos/vendor/marzipano.js"></script>
+</head>
+<body>
+  <div id="pano"></div>
+  <script>
+    // Inisialisasi viewer
+    var viewer = new Marzipano.Viewer(document.getElementById('pano'));
+
+    // Fungsi buat scene
+    function createScene(imageUrl) {
+      var source = Marzipano.ImageUrlSource.fromString(imageUrl);
+      var geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
+      var limiter = Marzipano.RectilinearView.limit.traditional(1024, 120*Math.PI/180);
+      var view = new Marzipano.RectilinearView(null, limiter);
+      return viewer.createScene({
+        source: source,
+        geometry: geometry,
+        view: view
+      });
+    }
+
+    // Buat dua scene
+    var scene1 = createScene("1.jpeg");
+    var scene2 = createScene("2.jpeg");
+
+    // Hotspot pindah scene
+    scene1.hotspotContainer().createHotspot(
+      createElement("Ke Lokasi 2"), { yaw: 0.3, pitch: 0 }
+    ).onclick = function() { scene2.switchTo(); };
+
+    scene2.hotspotContainer().createHotspot(
+      createElement("Ke Lokasi 1"), { yaw: -0.3, pitch: 0 }
+    ).onclick = function() { scene1.switchTo(); };
+
+    // Fungsi buat hotspot element
+    function createElement(text) {
+      var el = document.createElement('div');
+      el.className = 'hotspot';
+      el.innerText = text;
+      return el;
+    }
+
+    // Tampilkan scene awal
+    scene1.switchTo();
+  </script>
+</body>
+</html>
