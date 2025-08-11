@@ -2,13 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Virtual Tour</title>
+  <title>Virtual Tour - Marzipano</title>
   <style>
     html, body { height: 100%; margin: 0; }
     #pano { width: 100%; height: 100%; background: #000; }
-    .hotspot { background: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; cursor: pointer; }
+    .hotspot {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
   </style>
-<script src="https://cdn.jsdelivr.net/gh/google/marzipano@master/dist/marzipano.js"></script>
+  <!-- CDN resmi Marzipano -->
+  <script src="https://cdn.jsdelivr.net/gh/google/marzipano@master/dist/marzipano.js"></script>
 </head>
 <body>
   <div id="pano"></div>
@@ -16,12 +24,15 @@
     // Inisialisasi viewer
     var viewer = new Marzipano.Viewer(document.getElementById('pano'));
 
-    // Fungsi buat scene
+    // Fungsi membuat scene
     function createScene(imageUrl) {
       var source = Marzipano.ImageUrlSource.fromString(imageUrl);
       var geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
       var limiter = Marzipano.RectilinearView.limit.traditional(1024, 120*Math.PI/180);
-      var view = new Marzipano.RectilinearView(null, limiter);
+      var view = new Marzipano.RectilinearView(
+        { yaw: 0, pitch: 0, fov: Math.PI/2 }, // parameter awal
+        limiter
+      );
       return viewer.createScene({
         source: source,
         geometry: geometry,
@@ -29,31 +40,33 @@
       });
     }
 
-    // Buat dua scene
+    // Buat dua scene contoh (nanti bisa ganti URL)
     var scene1 = createScene("https://www.marzipano.net/media/equirectangular.jpg");
-var scene2 = createScene("https://www.marzipano.net/media/equirectangular.jpg");
+    var scene2 = createScene("https://www.marzipano.net/media/equirectangular.jpg");
 
-
-    // Hotspot pindah scene
-    scene1.hotspotContainer().createHotspot(
-      createElement("Ke Lokasi 2"), { yaw: 0.3, pitch: 0 }
-    ).onclick = function() { scene2.switchTo(); };
-
-    scene2.hotspotContainer().createHotspot(
-      createElement("Ke Lokasi 1"), { yaw: -0.3, pitch: 0 }
-    ).onclick = function() { scene1.switchTo(); };
-
-    // Fungsi buat hotspot element
-    function createElement(text) {
+    // Fungsi buat element hotspot
+    function createHotspotElement(text, onClick) {
       var el = document.createElement('div');
       el.className = 'hotspot';
-      el.innerText = text;
+      el.textContent = text;
+      el.addEventListener('click', onClick);
       return el;
     }
+
+    // Hotspot Scene 1 ke Scene 2
+    var hotspot1 = createHotspotElement("Ke Lokasi 2", function() {
+      scene2.switchTo();
+    });
+    scene1.hotspotContainer().createHotspot(hotspot1, { yaw: 0.3, pitch: 0 });
+
+    // Hotspot Scene 2 ke Scene 1
+    var hotspot2 = createHotspotElement("Ke Lokasi 1", function() {
+      scene1.switchTo();
+    });
+    scene2.hotspotContainer().createHotspot(hotspot2, { yaw: -0.3, pitch: 0 });
 
     // Tampilkan scene awal
     scene1.switchTo();
   </script>
 </body>
 </html>
-
